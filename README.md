@@ -61,7 +61,7 @@ Ideas: Azure SQL Database, Azure VM, or Azure Container Instances
 
 ## 📞 Connect
 
-- LinkedIn: [your-linkedin](https://linkedin.com/in/vipalg)
+- LinkedIn: [linkedin](https://linkedin.com/in/vipalg)
 - Email: vipal.gujrathi@hotmail.com
 
 ---
