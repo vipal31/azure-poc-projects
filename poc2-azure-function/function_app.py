@@ -17,6 +17,7 @@ def hello(req: func.HttpRequest) -> func.HttpResponse:
         # If no JSON body, try query parameter
         name = req.params.get('name', 'World')
 
+
     # Create response message
     message = f"Hello, {name}! 👋"
 
