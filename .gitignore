@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Ansible
+*.retry
+.ansible/
+
+# Secrets
+*.pem
+.env
+
+# IDE
+.vscode/
+.idea/
