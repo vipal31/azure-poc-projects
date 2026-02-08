@@ -54,6 +54,21 @@ Build real-world Azure experience through progressively complex projects, coveri
 
 ---
 
+### [Break & Learn: Production Incident Simulation](./poc2-serverless-api/lesson_learned.md)
+
+**Status:** 🔥 Ongoing
+**Description:** Intentional breaking and troubleshooting of POCs to develop real-world incident response skills
+**Focus:** Security testing, resource exhaustion, dependency failures, configuration drift
+**Key Skills:** Root cause analysis, Application Insights diagnostics, incident documentation, prevention strategies
+
+**Completed Incidents:**
+- ✅ **Break #0:** Accidental test code in production (24hr outage) - [Full writeup](./poc2-serverless-api/lesson_learned.md)
+- 🔄 **Break #1:** Security testing - Authentication bypass (In Progress)
+
+**Why This Matters:** Certifications teach you how to build. Breaking things teaches you how to operate.
+
+---
+
 ### POC 4: Coming Soon
 
 **Status:** 🚧 Planned
@@ -79,20 +94,30 @@ Build real-world Azure experience through progressively complex projects, coveri
 
 ---
 
+### Phase 1.5: Operational Skills (Current 🔥)
+
+**Focus:** Break & Learn - Production Incident Response
+
+- 🔥 **Break & Learn Series** - Intentional breaking of POCs
+  - Security vulnerabilities
+  - Resource exhaustion
+  - Configuration drift
+  - Dependency failures
+
+**Skills Being Developed:**
+- Incident response and troubleshooting
+- Application Insights diagnostics
+- Root cause analysis
+- Prevention strategies and runbooks
+- Production-ready thinking
+
+---
+
 ### Phase 2: Intermediate (Next ⏳)
 
 **Focus:** Data, Integration, Automation
 
 - ⏳ **POC 4** - Database (Azure SQL or Cosmos DB)
-- ⏳ **POC 5** - Containers (Azure Container Instances/Apps)
-- ⏳ **POC 6** - Infrastructure as Code (Bicep or Terraform)
-
-**Target Skills:**
-
-- Data persistence and queries
-- Container orchestration
-- IaC for repeatable deployments
-- CI/CD pipelines
 
 ---
 
@@ -132,12 +157,21 @@ Build real-world Azure experience through progressively complex projects, coveri
 - SSH agent forwarding for secure multi-hop access
 - Cost-conscious decision making (Standard HDD vs SSD, B1s vs larger VMs)
 
+### Operational Excellence
+
+- Root cause analysis and incident documentation
+- Application Insights for production diagnostics
+- Pre-deployment checklists and verification routines
+- Learning from failures (Break #0: Test code in production)
+- Process-driven engineering (not just building, but operating)
+
 ### Total Azure Spend
 
 - **POC 1:** ~$1 (ongoing)
-- **POC 2:** $0 (free tier)
+- **POC 2:** $0 (free tier) - Currently under security testing
 - **POC 3:** ~$0.30 (built and deleted)
-- **Total:** ~$1.30 for 3 complete POCs
+- **Break & Learn:** $0 (using existing POCs)
+- **Total:** ~$1.30 for 3 POCs + operational training
 
 *Compared to traditional hosting: ~$50-100/month savings*
 
