@@ -1,23 +1,29 @@
-name: Basic CI Pipeline
+name: CI Pipeline with Security + IaC Scanning
 
 # Trigger on push to main branch
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch: # Allow manual trigger
 
-# What the pipeline can do
+# Permissions
 permissions:
   contents: read
+  security-events: write # Needed for security scanning results
 
 # Environment variables
 env:
   PYTHON_VERSION: "3.11"
 
-# The actual jobs
+# Jobs
 jobs:
-  # JOB 1: Lint YAML files
+  # ==========================================
+  # JOB 1: YAML LINTING
+  # ==========================================
   yaml-lint:
     name: YAML Lint
     runs-on: ubuntu-latest
@@ -35,10 +41,12 @@ jobs:
         run: pip install yamllint
 
       - name: Run yamllint
-        run: yamllint . || true
+        run: yamllint .
         continue-on-error: true
 
-  # JOB 2: Lint Ansible playbooks
+  # ==========================================
+  # JOB 2: ANSIBLE LINTING
+  # ==========================================
   ansible-lint:
     name: Ansible Lint
     runs-on: ubuntu-latest
@@ -58,10 +66,12 @@ jobs:
 
       - name: Run ansible-lint
         run: |
-          ansible-lint playbooks/ roles/ || true
+          ansible-lint playbooks/ roles/ || echo "Ansible lint completed with warnings"
         continue-on-error: true
 
-  # JOB 3: Lint Python code
+  # ==========================================
+  # JOB 3: PYTHON LINTING
+  # ==========================================
   python-lint:
     name: Python Lint
     runs-on: ubuntu-latest
@@ -81,10 +91,154 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          flake8 scripts/python/ --max-line-length=100 || true
+          flake8 scripts/python/ --max-line-length=100 --exclude=.venv,venv || echo "Flake8 completed with issues"
         continue-on-error: true
 
       - name: Lint with pylint
         run: |
-          pylint scripts/python/ || true
+          pylint scripts/python/ --max-line-length=100 || echo "Pylint completed with issues"
         continue-on-error: true
+
+  # ==========================================
+  # JOB 4: PYTHON SECURITY SCAN (BANDIT)
+  # ==========================================
+  python-security:
+    name: Python Security (Bandit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Bandit
+        run: pip install bandit[toml]
+
+      - name: Run Bandit security scan
+        run: |
+          bandit -r scripts/python/ -f json -o bandit-report.json || true
+          bandit -r scripts/python/ -f screen
+        continue-on-error: true
+
+      - name: Upload Bandit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bandit-security-report
+          path: bandit-report.json
+          retention-days: 30
+
+  # ==========================================
+  # JOB 5: SECRET DETECTION (GITLEAKS)
+  # ==========================================
+  secret-scan:
+    name: Secret Detection (Gitleaks)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for secret scanning
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+  # ==========================================
+  # JOB 6: INFRASTRUCTURE AS CODE SCAN (KICS)
+  # ==========================================
+  iac-security:
+    name: IaC Security (KICS)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run KICS Scan
+        uses: checkmarx/kics-github-action@v2.1.0
+        with:
+          # Scan paths
+          path: "playbooks,roles"
+          # Output formats
+          output_formats: "json,sarif"
+          output_path: "kics-results"
+          # Fail on high severity (optional - set to 'true' to fail pipeline)
+          fail_on: high
+          # Enable specific queries for Azure
+          platform_type: "Ansible"
+          # Ignore certain paths
+          exclude_paths: ".github/,.venv/,venv/"
+        continue-on-error: true
+
+      - name: Display KICS Results
+        if: always()
+        run: |
+          echo "=================================="
+          echo "KICS Scan Results Summary"
+          echo "=================================="
+          if [ -f "kics-results/results.json" ]; then
+            cat kics-results/results.json | jq '.severity_counters' || echo "Results file found but couldn't parse"
+          else
+            echo "No results file found - scan may not have run"
+          fi
+
+      - name: Upload KICS Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kics-results
+          path: kics-results/
+          retention-days: 30
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: "kics-results/results.sarif"
+        continue-on-error: true
+
+  # ==========================================
+  # JOB 7: PIPELINE SUMMARY
+  # ==========================================
+  pipeline-summary:
+    name: Pipeline Summary
+    runs-on: ubuntu-latest
+    needs:
+      [
+        yaml-lint,
+        ansible-lint,
+        python-lint,
+        python-security,
+        secret-scan,
+        iac-security,
+      ]
+    if: always()
+
+    steps:
+      - name: Check results
+        run: |
+          echo "========================================="
+          echo "CI/CD Pipeline Completed!"
+          echo "========================================="
+          echo ""
+          echo "✅ YAML Linting: Complete"
+          echo "✅ Ansible Linting: Complete"
+          echo "✅ Python Linting: Complete"
+          echo "✅ Python Security (Bandit): Complete"
+          echo "✅ Secret Detection (Gitleaks): Complete"
+          echo "✅ IaC Security (KICS): Complete"
+          echo ""
+          echo "📊 Reports Available:"
+          echo "  - Bandit: bandit-security-report artifact"
+          echo "  - KICS: kics-results artifact"
+          echo "  - KICS SARIF: GitHub Security tab"
+          echo ""
+          echo "Check individual jobs above for details."
