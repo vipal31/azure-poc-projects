@@ -31,7 +31,7 @@ Build real-world Azure experience through progressively complex projects, coveri
 **Services:** Azure Functions (Flex Consumption), Application Insights
 **Key Skills:** Serverless architecture, Python Azure SDK, HTTP triggers, anonymous vs function-level auth, API design
 **Cost:** $0/month (free tier: 1M requests)
-**Live Demo:** [Test API](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F)
+**Live Demo:** [Test API](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure&code=BfqRhhN03GctW6B-b6oJBS1V3sTCftRJ69Oy8P_u180EAzFuRXUm-Q==)
 
 ---
 
@@ -63,7 +63,7 @@ Build real-world Azure experience through progressively complex projects, coveri
 
 **Completed Incidents:**
 - ✅ **Break #0:** Accidental test code in production (24hr outage) - [Full writeup](./poc2-serverless-api/lesson_learned.md)
-- 🔄 **Break #1:** Security testing - Authentication bypass (In Progress)
+- ✅ **Break #1:** Security testing - Authentication bypass - [Full writeup](./poc2-serverless-api/lesson_learned.md)
 
 **Why This Matters:** Certifications teach you how to build. Breaking things teaches you how to operate.
 
@@ -168,7 +168,7 @@ Build real-world Azure experience through progressively complex projects, coveri
 ### Total Azure Spend
 
 - **POC 1:** ~$1 (ongoing)
-- **POC 2:** $0 (free tier) - Currently under security testing
+- **POC 2:** $0 (free tier) - Secured with function-level authentication
 - **POC 3:** ~$0.30 (built and deleted)
 - **Break & Learn:** $0 (using existing POCs)
 - **Total:** ~$1.30 for 3 POCs + operational training

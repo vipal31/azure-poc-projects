@@ -4,9 +4,9 @@ Two Python serverless APIs: greeting and temperature converter.
 
 ## 🌐 Try Them Live
 
-**Greeting:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure)
+**Greeting:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure&code=BfqRhhN03GctW6B-b6oJBS1V3sTCftRJ69Oy8P_u180EAzFuRXUm-Q==)
 
-**Temperature:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F)
+**Temperature:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F&code=LuxVD3uzTjRwlDtS8siwp0NECt0-ujKJbwAEiWHv8xmuAzFuRidirA==)
 
 ### 🔓 Security Note
 
