@@ -48,9 +48,9 @@ Left time.sleep(300) in code from timeout testing session.
 - All API calls failing with 500 errors
 
 **Business (if production):**
--   100% service unavailability
-  - Loss of user trust
-  - Potential revenue impact
+- 100% service unavailability
+- Loss of user trust
+- Potential revenue impact
 
 **Actual impact (POC environment):**
 - Portfolio demo broken for ~24 hours
