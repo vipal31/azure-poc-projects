@@ -164,7 +164,7 @@ GET /api/hello?name=Test
 Response: 401 Unauthorized
 ```
 ![Error](../poc2-serverless-api/screenshots/poc2-annoymous-auth-not-working.png)
-
+```
 # With key (allowed):
 GET /api/hello?name=Test&code=<function_key>
 Response: 200 OK
