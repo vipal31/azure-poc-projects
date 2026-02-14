@@ -162,6 +162,7 @@ Public API with anonymous authentication - anyone with the URL could call withou
 # Without key (blocked):
 GET /api/hello?name=Test
 Response: 401 Unauthorized
+```
 ![Error](../poc2-serverless-api/screenshots/poc2-annoymous-auth-not-working.png)
 
 # With key (allowed):
