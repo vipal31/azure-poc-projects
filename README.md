@@ -31,7 +31,10 @@ Build real-world Azure experience through progressively complex projects, coveri
 **Services:** Azure Functions (Flex Consumption), Application Insights
 **Key Skills:** Serverless architecture, Python Azure SDK, HTTP triggers, anonymous vs function-level auth, API design
 **Cost:** $0/month (free tier: 1M requests)
-**Live Demo:** [Test API](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure&code=BfqRhhN03GctW6B-b6oJBS1V3sTCftRJ69Oy8P_u180EAzFuRXUm-Q==)
+**Live Demo:** [Test API](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure&code=CONTACT_FOR_KEY)
+
+Add note:
+> Replace `CONTACT_FOR_KEY` with actual key (available on request)
 
 ---
 
