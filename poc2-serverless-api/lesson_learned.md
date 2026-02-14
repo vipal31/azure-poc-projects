@@ -103,6 +103,7 @@ Left time.sleep(300) in code from timeout testing session.
 
 Planned break scenarios:
 - Break #1: Security - Testing authentication bypass
+- Break #1.5: Secrets Management
 - Break #2: Resource exhaustion - Load testing concurrent requests
 - Break #3: Dependency failure - Simulating external service outage
 
@@ -197,3 +198,52 @@ For production APIs, consider additional layers:
 - Break #0: Accidental test code in production
 
 ---
+
+## Break #1.5: Accidentally Committing Secrets
+
+**Date:** February 14, 2026
+**Type:** Security incident (prevented)
+**Status:** ✅ Caught before damage
+
+### What Happened
+
+Attempted to commit actual Azure Function key to public GitHub repository. GitHub Push Protection blocked the commit.
+
+### Why This Matters
+
+**If successful, would have resulted in:**
+- Public exposure of API authentication key
+- Unauthorized API usage
+- Potential cost overrun
+- Need for immediate key rotation
+
+### Detection
+
+GitHub secret scanning detected:
+- "Azure Function Key" pattern in `README.md`
+- "Azure Function Key" pattern in `poc2-serverless-api/README.md`
+- **Blocked push automatically**
+
+### Resolution
+
+**Immediate action:**
+1. Removed actual key from documentation
+2. Used placeholder text instead
+3. Added contact information for demo access
+
+**Prevention:**
+- Never commit actual secrets to version control
+- Use placeholders in documentation
+- For demos: Create separate "demo" keys that can be rotated
+- Consider using Azure Key Vault for secret management
+
+### Key Takeaways
+
+1. **GitHub Push Protection works** - Saved from accidental exposure
+2. **Public repos require extra care** - Assume everything is visible
+3. **Demo keys vs production keys** - Separate credentials for different purposes
+4. **Documentation security** - READMEs can leak secrets too, not just code
+
+### Related Incidents
+- Break #0: Test code in production
+- Break #1: Authentication bypass testing

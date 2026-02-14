@@ -65,9 +65,9 @@ Add note:
 **Key Skills:** Root cause analysis, Application Insights diagnostics, incident documentation, prevention strategies
 
 **Completed Incidents:**
-- ✅ **Break #0:** Accidental test code in production (24hr outage) - [Full writeup](./poc2-serverless-api/lesson_learned.md)
-- ✅ **Break #1:** Security testing - Authentication bypass - [Full writeup](./poc2-serverless-api/lesson_learned.md)
-
+-  **Break #0:** Accidental test code in production (24hr outage) - [Full writeup](./poc2-serverless-api/lesson_learned.md)
+-  **Break #1:** Security testing - Authentication bypass - [Full writeup](./poc2-serverless-api/lesson_learned.md)
+-  **Break #1.5:** Accidentally Committing Secrets
 **Why This Matters:** Certifications teach you how to build. Breaking things teaches you how to operate.
 
 ---
