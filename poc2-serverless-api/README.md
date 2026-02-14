@@ -4,13 +4,19 @@ Two Python serverless APIs: greeting and temperature converter.
 
 ## 🌐 Try Them Live
 
-**Greeting:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure)
+**Greeting:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure&code=CONTACT_FOR_KEY)
 
-**Temperature:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F)
+**Temperature:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F&code=CONTACT_FOR_KEY)
+
+Add note:
+> Replace `CONTACT_FOR_KEY` with actual key (available on request)
 
 ### 🔓 Security Note
 
 Functions use **anonymous access** (no API keys) for easy testing and demo purposes. In production, I would implement function keys, Azure AD authentication, or API Management for proper security.
+
+Update - I have implemented API key and it worked
+ ![Success](../poc2-serverless-api/screenshots/hello_function_with_key.png)
 
 ## 🎯 What I Built
 

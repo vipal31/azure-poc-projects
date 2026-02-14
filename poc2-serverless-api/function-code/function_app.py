@@ -2,7 +2,7 @@ import azure.functions as func
 import json
 import logging
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
 @app.route(route="hello")
 def hello(req: func.HttpRequest) -> func.HttpResponse:

@@ -48,9 +48,9 @@ Left time.sleep(300) in code from timeout testing session.
 - All API calls failing with 500 errors
 
 **Business (if production):**
--   100% service unavailability
-  - Loss of user trust
-  - Potential revenue impact
+- 100% service unavailability
+- Loss of user trust
+- Potential revenue impact
 
 **Actual impact (POC environment):**
 - Portfolio demo broken for ~24 hours
@@ -103,7 +103,147 @@ Left time.sleep(300) in code from timeout testing session.
 
 Planned break scenarios:
 - Break #1: Security - Testing authentication bypass
+- Break #1.5: Secrets Management
 - Break #2: Resource exhaustion - Load testing concurrent requests
 - Break #3: Dependency failure - Simulating external service outage
 
 [Results will be documented here as experiments are completed]
+
+---
+
+## Break #1: Security Testing - Authentication Bypass
+
+**Date:** February 14, 2026
+**Duration:** ~1 hour
+**Type:** Security vulnerability assessment
+**Status:** ✅ Mitigated
+
+### What We Tested
+
+Public API with anonymous authentication - anyone with the URL could call without restrictions.
+
+### Investigation Process
+
+**Security assessment:**
+1. Tested API accessibility from incognito browser ✅ Fully accessible
+2. Checked Application Insights for client tracking:
+   - Client IPs masked (0.0.0.0) - cannot block by IP
+   - Geo-location data inaccurate (showed wrong city)
+   - Can track sessions via `operation_Id`
+3. Evaluated security control options:
+   - IP blocking ❌ No real IPs available
+   - Geo-blocking ❌ Location data unreliable
+   - API keys ✅ Viable option
+   - Rate limiting ⏳ Not tested yet
+
+### Threat Assessment
+
+**Identified risks:**
+1. **Cost overrun** - Abuse beyond free tier (1M requests/month)
+2. **Reputation damage** - DDoS could make API appear broken
+3. **Unauthorized use** - API used without permission
+
+**Decision:** Implement function-level API key authentication
+
+### Resolution
+
+**Changed authentication model:**
+- **Before:** `auth_level=func.AuthLevel.ANONYMOUS`
+- **After:** `auth_level=func.AuthLevel.FUNCTION`
+
+**Implementation steps:**
+1. Modified `function_app.py` to require function-level auth
+2. Redeployed function to Azure
+3. Retrieved function key from Azure Portal
+4. Updated documentation with secured endpoint
+
+**Access pattern:**
+```
+# Without key (blocked):
+GET /api/hello?name=Test
+Response: 401 Unauthorized
+![Error](../poc2-serverless-api/screenshots/poc2-annoymous-auth-not-working.png)
+
+# With key (allowed):
+GET /api/hello?name=Test&code=<function_key>
+Response: 200 OK
+```
+![Success](../poc2-serverless-api/screenshots/hello_function_with_key.png)
+
+### Verification
+
+- ✅ Anonymous requests return 401 Unauthorized
+- ✅ Requests with valid function key return 200 OK
+- ✅ Function key managed securely in Azure Portal
+- ✅ Demo still accessible (key embedded in shared URLs)
+
+### Key Takeaways
+
+1. **Portal vs Code configuration** - Auth level defined in code overrides portal settings
+2. **Client IP limitations** - Azure Functions mask real client IPs (0.0.0.0), making IP-based blocking ineffective
+3. **Geo-location unreliability** - IP geolocation databases can be inaccurate, especially for ISPs and mobile carriers
+4. **Session tracking works** - Can detect abuse patterns via `operation_Id` even without real IPs
+5. **Security vs accessibility trade-off** - Function keys provide security while maintaining demo accessibility (key in URL)
+
+### Production Considerations
+
+For production APIs, consider additional layers:
+- Rate limiting per session/key
+- Azure API Management for advanced throttling
+- Monitoring alerts for unusual traffic patterns
+- Key rotation policy
+- Separate keys per consumer for tracking and revocation
+
+### Related Incidents
+- Break #0: Accidental test code in production
+
+---
+
+## Break #1.5: Accidentally Committing Secrets
+
+**Date:** February 14, 2026
+**Type:** Security incident (prevented)
+**Status:** ✅ Caught before damage
+
+### What Happened
+
+Attempted to commit actual Azure Function key to public GitHub repository. GitHub Push Protection blocked the commit.
+
+### Why This Matters
+
+**If successful, would have resulted in:**
+- Public exposure of API authentication key
+- Unauthorized API usage
+- Potential cost overrun
+- Need for immediate key rotation
+
+### Detection
+
+GitHub secret scanning detected:
+- "Azure Function Key" pattern in `README.md`
+- "Azure Function Key" pattern in `poc2-serverless-api/README.md`
+- **Blocked push automatically**
+
+### Resolution
+
+**Immediate action:**
+1. Removed actual key from documentation
+2. Used placeholder text instead
+3. Added contact information for demo access
+
+**Prevention:**
+- Never commit actual secrets to version control
+- Use placeholders in documentation
+- For demos: Create separate "demo" keys that can be rotated
+- Consider using Azure Key Vault for secret management
+
+### Key Takeaways
+
+1. **GitHub Push Protection works** - Saved from accidental exposure
+2. **Public repos require extra care** - Assume everything is visible
+3. **Demo keys vs production keys** - Separate credentials for different purposes
+4. **Documentation security** - READMEs can leak secrets too, not just code
+
+### Related Incidents
+- Break #0: Test code in production
+- Break #1: Authentication bypass testing
