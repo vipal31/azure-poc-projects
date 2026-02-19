@@ -33,8 +33,7 @@ Build real-world Azure experience through progressively complex projects, coveri
 **Cost:** $0/month (free tier: 1M requests)
 **Live Demo:** [Test API](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/hello?name=Azure&code=CONTACT_FOR_KEY)
 
-Add note:
-> Replace `CONTACT_FOR_KEY` with actual key (available on request)
+Note - Replace `CONTACT_FOR_KEY` with actual key (available on request or create issue in repo)
 
 ---
 
