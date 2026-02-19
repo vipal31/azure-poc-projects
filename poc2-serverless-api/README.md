@@ -8,8 +8,7 @@ Two Python serverless APIs: greeting and temperature converter.
 
 **Temperature:** [https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F](https://hellovipal-c4a4deegake9f3a3.centralindia-01.azurewebsites.net/api/convert?value=100&from=C&to=F&code=CONTACT_FOR_KEY)
 
-Add note:
-> Replace `CONTACT_FOR_KEY` with actual key (available on request)
+Note - Replace `CONTACT_FOR_KEY` with actual key (available on request or create issue in repo)
 
 ### 🔓 Security Note
 
@@ -32,8 +31,8 @@ Python 3.11, Azure Functions (Flex Consumption), Application Insights
 
 ## 📸 Screenshots
 
-![Functions List](./screenshots/functions-list.png)
-![Test Result](./screenshots/temp-covt-func-output.png)
+![Functions List](../poc2-serverless-api/screenshots/function-list.png)
+![Test Result](../poc2-serverless-api/screenshots/temp-covt-func-output.png)
 
 ## 💡 Key Learnings
 
