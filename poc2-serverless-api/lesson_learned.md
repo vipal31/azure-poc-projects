@@ -249,3 +249,182 @@ GitHub secret scanning detected:
 ### Related Incidents
 - Break #0: Test code in production
 - Break #1: Authentication bypass testing
+
+---
+
+## Break #2: Client IP Discovery and Header Spoofing
+
+**Date:** February 18, 2026
+**Duration:** ~2 hours
+**Type:** Security investigation - Network architecture and header trust
+**Status:** ✅ Documented
+
+### What We Investigated
+
+Why does Application Insights show `client_IP: 0.0.0.0` when Azure Access Restrictions clearly see real client IPs and enforce geo-based rules?
+
+### Background Question
+
+**Initial observation:**
+- Application Insights `requests` table: `client_IP = 0.0.0.0`
+- Application Insights `requests` table: Shows correct city/country
+- Access Restrictions: Can successfully block/allow by IP
+
+**Contradiction:** How can Azure know the location without knowing the IP?
+
+### Investigation Process
+
+**Phase 1: Understanding the architecture**
+
+Compared Azure Functions to POC 3 (Multi-tier network):
+```
+POC 3 Architecture:
+Client (203.x.x.x) → Nginx → Flask API
+Flask sees: Nginx's internal IP (10.0.x.x)
+
+Azure Functions Architecture:
+Client (203.x.x.x) → Azure Gateway → Function Code
+Function sees: ???
+```
+
+**Key insight:** Azure Functions, like POC 3's Flask API, sits behind a reverse proxy (Azure Application Gateway).
+
+---
+
+**Phase 2: Finding the real client IP**
+
+Added custom logging to function code:
+```python
+forwarded_ip = req.headers.get('X-Forwarded-For', 'Not found')
+remote_addr = req.headers.get('REMOTE_ADDR', 'Not found')
+logging.info(f'X-Forwarded-For: {forwarded_ip}')
+logging.info(f'REMOTE_ADDR: {remote_addr}')
+```
+
+**Results:**
+```
+REMOTE_ADDR: Not found (Azure doesn't expose this)
+X-Forwarded-For: 168.159.160.203:10474 ✅ Real client IP
+```
+
+**Discovery:** Real client IP IS available in the `X-Forwarded-For` header, but Application Insights doesn't log it by default in the `requests` table.
+
+---
+
+**Phase 3: Testing header trust (Security)**
+
+**Question:** Can attackers spoof `X-Forwarded-For` to hide their real IP?
+
+**Test:** Called function with fake IP header:
+```bash
+curl -H "X-Forwarded-For: 1.2.3.4" https://function.com/api/hello
+```
+
+**Result:**
+```
+X-Forwarded-For: 1.2.3.4, 168.x.x.x:2904
+                 ^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^
+                 FAKE      REAL (added by Azure)
+```
+
+**Critical finding:** X-Forwarded-For is a comma-separated list. Client can inject fake IPs, but Azure Gateway appends the REAL IP at the end.
+
+### Architecture Layers Explained
+```
+Layer 1: Client → Azure Gateway
+- Azure sees REAL client IP
+- Enforces Access Restrictions here
+- Can block by geo/IP
+
+Layer 2: Azure Gateway → Function Code
+- Gateway strips real IP (shows 0.0.0.0 or internal IP)
+- Adds X-Forwarded-For header with real IP
+- Function code must read header to get real IP
+
+Layer 3: Function Code → Application Insights
+- Default telemetry logs what code sees (0.0.0.0)
+- Custom logs can extract from X-Forwarded-For
+```
+
+**This explains the contradiction:**
+- Access Restrictions work at Layer 1 (platform level) ✅
+- Application Insights logs at Layer 3 (code level) ✅
+- Both are correct for their respective layers
+
+### Security Implications
+
+**Vulnerable code pattern (common mistake):**
+```python
+# ❌ WRONG - trusts first IP (attacker controlled)
+client_ip = req.headers.get('X-Forwarded-For', '').split(',')[0]
+# Attacker sends: X-Forwarded-For: 1.2.3.4
+# Result: Uses fake IP for rate limiting/blocking
+```
+
+**Secure code pattern:**
+```python
+# ✅ CORRECT - trusts rightmost IP (Azure-provided)
+forwarded_for = req.headers.get('X-Forwarded-For', '')
+if forwarded_for:
+    # Rightmost IP is added by trusted proxy (Azure)
+    client_ip = forwarded_for.split(',')[-1].strip().split(':')[0]
+else:
+    client_ip = '0.0.0.0'
+```
+
+**Why rightmost?** Each proxy in the chain appends the IP it sees. The rightmost IP is added by Azure Gateway (trusted), while leftmost IPs can be client-controlled (untrusted).
+
+### Resolution
+
+**Documented secure pattern for future implementation:**
+
+When client IP is needed for rate limiting, logging, or security decisions:
+
+1. **Extract from X-Forwarded-For header** (not from default telemetry)
+2. **Trust rightmost IP only** (added by Azure Gateway, not client-spoofable)
+3. **Handle edge cases** (missing header, port numbers, multiple proxies)
+
+
+**Status:** Pattern documented, not implemented in current POC (simple hello function doesn't require IP-based logic). Available for future use cases requiring client IP (rate limiting, geo-blocking, audit logging).
+
+**Test artifacts preserved:** Custom logging code added temporarily to verify X-Forwarded-For behavior, then removed to keep POC simple.
+
+### Comparison: Azure Functions vs VMs
+
+| Aspect              | VMs (POC 3)                      | Azure Functions                 |
+| ---------------------| ----------------------------------| ---------------------------------|
+| **IP visibility**   | Direct (VM has public IP on NIC) | Indirect (behind Azure Gateway) |
+| **Access control**  | NSG attached to NIC              | Access Restrictions (app-level) |
+| **Real IP in logs** | ✅ Yes (direct connection)        | ❌ No (stripped by gateway)      |
+| **Getting real IP** | Available by default             | Must parse X-Forwarded-For      |
+| **Spoofing risk**   | Lower (direct connection)        | Higher (must validate header)   |
+
+### Key Takeaways
+
+1. **Layered architecture matters** - Different layers see different things. Azure platform sees real IP, function code sees stripped IP.
+
+2. **X-Forwarded-For is not simple** - It's a chain of IPs. Only the rightmost (added by your trusted proxy) is reliable.
+
+3. **Default telemetry has gaps** - Application Insights logs what code sees (0.0.0.0), not what platform sees (real IP). Custom logging required.
+
+4. **Trust model is critical** - Never trust client-provided headers blindly. Understand which headers your infrastructure adds vs which clients can spoof.
+
+5. **POC 3 taught this concept** - Nginx reverse proxy in POC 3 had the same IP-stripping behavior. Azure Functions operates on the same principle at scale.
+
+6. **Access Restrictions vs Logging** - Access Restrictions work at platform level (effective), but you still need custom code to LOG the IPs for audit/debugging.
+
+
+### Related Incidents
+- Break #0: Test code in production
+- Break #1: Authentication bypass testing
+
+---
+
+## Future Breaks
+
+Planned break scenarios:
+- Break #3: Input validation - XSS/injection testing
+- Break #4: Resource exhaustion - Load testing and scaling behavior
+- Break #5: Configuration drift - Missing environment variables
+
+[Results will be documented here as experiments are completed]
