@@ -68,6 +68,7 @@ Add note:
 -  **Break #0:** Accidental test code in production (24hr outage) - [Full writeup](./poc2-serverless-api/lesson_learned.md)
 -  **Break #1:** Security testing - Authentication bypass - [Full writeup](./poc2-serverless-api/lesson_learned.md)
 -  **Break #1.5:** Accidentally Committing Secrets
+-  **Break #2:** Client IP discovery → X-Forwarded-For security, header spoofing prevention
 **Why This Matters:** Certifications teach you how to build. Breaking things teaches you how to operate.
 
 ---

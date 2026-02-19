@@ -8,13 +8,16 @@ app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 def hello(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Hello function was triggered!')
 
-    try:
-        # Try to get JSON body
-        req_body = req.get_json()
-        name = req_body.get('name', 'World')
+    forwarded_ip = req.headers.get('X-Forwarded-For', 'Not found')
+    remote_addr = req.headers.get('REMOTE_ADDR', 'Not found')
+    logging.info(f'X-Forwarded-For: {forwarded_ip}')
+    logging.info(f'REMOTE_ADDR: {remote_addr}')
 
-    except:
-        # If no JSON body, try query parameter
+    try:
+        req_body = req.get_json()
+        name = req_body.get('name', 'World') if isinstance(req_body, dict) else 'World'
+
+    except (ValueError, json.JSONDecodeError):
         name = req.params.get('name', 'World')
 
     # Create response message
@@ -31,6 +34,7 @@ def hello(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(
         json.dumps(response),
         mimetype="application/json",
+        headers={"Content-Type": "application/json"},
         status_code=200
     )
 
@@ -38,27 +42,36 @@ def hello(req: func.HttpRequest) -> func.HttpResponse:
 def convert_temperature(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Temperature conversion function triggered')
 
+    forwarded_ip = req.headers.get('X-Forwarded-For', 'Not found')
+    remote_addr = req.headers.get('REMOTE_ADDR', 'Not found')
+    logging.info(f'X-Forwarded-For: {forwarded_ip}')
+    logging.info(f'REMOTE_ADDR: {remote_addr}')
+
     try:
-        # Get request body as JSON
         req_body = req.get_json()
+        if not isinstance(req_body, dict):
+            raise ValueError('Request body must be JSON object')
 
-        # Extract values
-        value = float(req_body.get('value'))
-        from_unit = req_body.get('from', '').upper()
-        to_unit = req_body.get('to', '').upper()
+        raw_value = req_body.get('value')
+        from_unit = str(req_body.get('from', '')).upper()
+        to_unit = str(req_body.get('to', '')).upper()
 
-        # Validate input
-        if not value and value != 0:
+        if raw_value is None:
             return func.HttpResponse(
                 json.dumps({"error": "Please provide a temperature value"}),
                 mimetype="application/json",
+                headers={"Content-Type": "application/json"},
                 status_code=400
             )
 
+        value = float(raw_value)
+
+        # Validate input
         if not from_unit or not to_unit:
             return func.HttpResponse(
                 json.dumps({"error": "Please provide 'from' and 'to' units (C or F)"}),
                 mimetype="application/json",
+                headers={"Content-Type": "application/json"},
                 status_code=400
             )
 
@@ -81,6 +94,7 @@ def convert_temperature(req: func.HttpRequest) -> func.HttpResponse:
             return func.HttpResponse(
                 json.dumps({"error": f"Unsupported conversion: {from_unit} to {to_unit}. Use C or F."}),
                 mimetype="application/json",
+                headers={"Content-Type": "application/json"},
                 status_code=400
             )
 
@@ -105,6 +119,7 @@ def convert_temperature(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(
             json.dumps(response),
             mimetype="application/json",
+            headers={"Content-Type": "application/json"},
             status_code=200
         )
 
@@ -112,6 +127,7 @@ def convert_temperature(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(
             json.dumps({"error": "Invalid input. 'value' must be a number."}),
             mimetype="application/json",
+            headers={"Content-Type": "application/json"},
             status_code=400
         )
 
@@ -120,5 +136,6 @@ def convert_temperature(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(
             json.dumps({"error": "An error occurred processing your request"}),
             mimetype="application/json",
+            headers={"Content-Type": "application/json"},
             status_code=500
         )
